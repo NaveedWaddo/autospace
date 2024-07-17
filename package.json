@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "private": true,
-  "scripts": {
-  },
+  "scripts": {},
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.5.3"
+  }
 }
