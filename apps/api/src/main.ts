@@ -22,8 +22,8 @@ You might also need to use the <a target="_blank" href="https://studio.apollogra
     .addBearerAuth()
     .build()
 
-  const document = SwaggerModule.createDocument(app , config);
-  SwaggerModule.setup('/', app , document)
+  const document = SwaggerModule.createDocument(app, config)
+  SwaggerModule.setup('/', app, document)
 
   await app.listen(3000)
 }
