@@ -4,4 +4,3 @@ export type GetUserType = {
   uid: string
   roles: Role[]
 }
-

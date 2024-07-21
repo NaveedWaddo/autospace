@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable , UnauthorizedException} from '@nestjs/common'
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common'
 import { FindManyUserArgs, FindUniqueUserArgs } from './dtos/find.args'
 import { PrismaService } from 'src/common/prisma/prisma.service'
 import {
@@ -9,7 +13,7 @@ import {
 } from './dtos/create-user.input'
 import { UpdateUserInput } from './dtos/update-user.input'
 import * as bcrypt from 'bcryptjs'
-import { v4 as uuid } from "uuid"
+import { v4 as uuid } from 'uuid'
 import { JwtService } from '@nestjs/jwt'
 
 @Injectable()
