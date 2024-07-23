@@ -1,7 +1,7 @@
 'use client'
 import { add } from '@autospace/sample-lib'
-import {useQuery } from "@apollo/client";
-import { CompaniesDocument } from "@autospace/network/src/gql/generated";
+import { useQuery } from '@apollo/client'
+import { CompaniesDocument } from '@autospace/network/src/gql/generated'
 
 export default function Home() {
   const { data, loading } = useQuery(CompaniesDocument)
