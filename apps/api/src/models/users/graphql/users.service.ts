@@ -110,7 +110,7 @@ export class UsersService {
       },
     )
 
-    return { token: jwtToken , user}
+    return { token: jwtToken, user }
   }
 
   findAll(args: FindManyUserArgs) {
