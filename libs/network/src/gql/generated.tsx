@@ -374,6 +374,7 @@ export type CreateBookingInput = {
   startTime: Scalars['DateTime']['input'];
   totalPrice?: InputMaybe<Scalars['Float']['input']>;
   type: SlotType;
+  valetAssignment?: InputMaybe<CreateValetAssignmentInputWithoutBookingId>;
   vehicleNumber: Scalars['String']['input'];
 };
 
@@ -433,6 +434,13 @@ export type CreateValetAssignmentInput = {
   returnLat?: InputMaybe<Scalars['Float']['input']>;
   returnLng?: InputMaybe<Scalars['Float']['input']>;
   returnValetId: Scalars['String']['input'];
+};
+
+export type CreateValetAssignmentInputWithoutBookingId = {
+  pickupLat: Scalars['Float']['input'];
+  pickupLng: Scalars['Float']['input'];
+  returnLat?: InputMaybe<Scalars['Float']['input']>;
+  returnLng?: InputMaybe<Scalars['Float']['input']>;
 };
 
 export type CreateValetInput = {
@@ -1460,6 +1468,7 @@ export type UpdateBookingInput = {
   startTime?: InputMaybe<Scalars['DateTime']['input']>;
   totalPrice?: InputMaybe<Scalars['Float']['input']>;
   type?: InputMaybe<SlotType>;
+  valetAssignment?: InputMaybe<CreateValetAssignmentInputWithoutBookingId>;
   vehicleNumber?: InputMaybe<Scalars['String']['input']>;
 };
 
