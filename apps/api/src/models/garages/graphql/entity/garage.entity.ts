@@ -19,7 +19,7 @@ export class Garage implements RestrictProperties<Garage, GarageType> {
 
 @ObjectType()
 export class SlotTypeCount {
-  @Field(() => SlotType) a
+  @Field(() => SlotType)
   type: SlotType
   count?: number
 }

@@ -29,6 +29,10 @@ enum AuthProviderType {
   CREDENTIALS
 }
 
+type AggregateCountOutput {
+  count: Float!
+}
+
 type LoginOutput {
   token: String!
   user: User!
@@ -95,6 +99,7 @@ type Booking {
   customerId: String!
   slot: Slot!
   customer: Customer!
+  bookingTimeline: [BookingTimeline!]!
   valetAssignment: ValetAssignment
 }
 
@@ -126,6 +131,7 @@ type Garage {
   updatedAt: DateTime!
   images: [String!]!
   companyId: Float!
+  slotCounts: [SlotTypeCount!]!
   availableSlots(slotsFilter: SlotWhereInput, dateFilter: DateFilterInput!): [MinimalSlotGroupBy!]!
   verification: Verification
   company: Company!
@@ -331,7 +337,6 @@ input BookingListRelationFilter {
 }
 
 input BookingWhereInput {
-  status: BookingStatus
   id: IntFilter
   createdAt: DateTimeFilter
   updatedAt: DateTimeFilter
@@ -342,6 +347,7 @@ input BookingWhereInput {
   vehicleNumber: StringFilter
   phoneNumber: StringFilter
   passcode: StringFilter
+  status: EnumBookingStatusFilter
   slotId: IntFilter
   customerId: StringFilter
   ValetAssignment: ValetAssignmentRelationFilter
@@ -351,6 +357,13 @@ input BookingWhereInput {
   AND: [BookingWhereInput!]
   OR: [BookingWhereInput!]
   NOT: [BookingWhereInput!]
+}
+
+input EnumBookingStatusFilter {
+  equals: BookingStatus
+  in: [BookingStatus!]
+  notIn: [BookingStatus!]
+  not: BookingStatus
 }
 
 input ValetAssignmentRelationFilter {
@@ -543,6 +556,22 @@ input DateFilterInput {
   end: String!
 }
 
+type SlotTypeCount {
+  type: SlotType!
+  count: Float
+}
+
+type Address {
+  garageId: Float
+  id: Float!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  address: String!
+  lat: Float!
+  lng: Float!
+  garage: Garage
+}
+
 type Slot {
   displayName: String
   length: Float
@@ -558,15 +587,8 @@ type Slot {
   bookings: [Booking!]!
 }
 
-type Address {
-  garageId: Float
-  id: Float!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  address: String!
-  lat: Float!
-  lng: Float!
-  garage: Garage
+type ReturnCount {
+  count: Float!
 }
 
 type MinimalSlotGroupBy {
@@ -578,13 +600,13 @@ type MinimalSlotGroupBy {
 type ValetAssignment {
   returnLat: Float
   returnLng: Float
+  pickupValetId: String
+  returnValetId: String
   bookingId: Float!
   createdAt: DateTime!
   updatedAt: DateTime!
   pickupLat: Float!
   pickupLng: Float!
-  pickupValetId: String!
-  returnValetId: String!
   pickupValet: Valet
   returnValet: Valet
 }
@@ -615,23 +637,37 @@ type Query {
   getAuthProvider(uid: String!): AuthProvider
   admins(distinct: [AdminScalarFieldEnum!], where: AdminWhereInput, orderBy: [AdminOrderByWithRelationInput!], cursor: AdminWhereUniqueInput, take: Float, skip: Float): [Admin!]!
   admin(where: AdminWhereUniqueInput!): Admin!
+  adminMe: Admin!
+  adminsCount(where: AdminWhereInput): Float!
   customers(distinct: [CustomerScalarFieldEnum!], where: CustomerWhereInput, orderBy: [CustomerOrderByWithRelationInput!], cursor: CustomerWhereUniqueInput, take: Float, skip: Float): [Customer!]!
   customer(where: CustomerWhereUniqueInput!): Customer!
   managers(distinct: [ManagerScalarFieldEnum!], where: ManagerWhereInput, orderBy: [ManagerOrderByWithRelationInput!], cursor: ManagerWhereUniqueInput, take: Float, skip: Float): [Manager!]!
   manager(where: ManagerWhereUniqueInput!): Manager!
   valets(distinct: [ValetScalarFieldEnum!], where: ValetWhereInput, orderBy: [ValetOrderByWithRelationInput!], cursor: ValetWhereUniqueInput, take: Float, skip: Float): [Valet!]!
+  companyValets(distinct: [ValetScalarFieldEnum!], where: ValetWhereInput, orderBy: [ValetOrderByWithRelationInput!], cursor: ValetWhereUniqueInput, take: Float, skip: Float): [Valet!]!
+  companyValetsTotal(where: ValetWhereInput): Float!
   valet(where: ValetWhereUniqueInput!): Valet!
+  valetMe: Valet
+  valetPickups(take: Float, skip: Float): [Booking!]!
+  valetPickupsTotal: Float!
+  valetDrops(take: Float, skip: Float): [Booking!]!
+  valetDropsTotal: Float!
   companies(distinct: [CompanyScalarFieldEnum!], where: CompanyWhereInput, orderBy: [CompanyOrderByWithRelationInput!], cursor: CompanyWhereUniqueInput, take: Float, skip: Float): [Company!]!
   myCompany: Company!
   company(where: CompanyWhereUniqueInput!): Company!
   garages(distinct: [GarageScalarFieldEnum!], where: GarageWhereInput, orderBy: [GarageOrderByWithRelationInput!], cursor: GarageWhereUniqueInput, take: Float, skip: Float): [Garage!]!
   garage(where: GarageWhereUniqueInput!): Garage!
   searchGarages(dateFilter: DateFilterInput!, locationFilter: LocationFilterInput!, slotsFilter: SlotWhereInput, garageFilter: GarageFilter): [Garage!]!
+  garagesCount(where: GarageWhereInput): AggregateCountOutput!
   addresses(distinct: [AddressScalarFieldEnum!], where: AddressWhereInput, orderBy: [AddressOrderByWithRelationInput!], cursor: AddressWhereUniqueInput, take: Float, skip: Float): [Address!]!
   address(where: AddressWhereUniqueInput!): Address!
   slots(distinct: [SlotScalarFieldEnum!], where: SlotWhereInput, orderBy: [SlotOrderByWithRelationInput!], cursor: SlotWhereUniqueInput, take: Float, skip: Float): [Slot!]!
   slot(where: SlotWhereUniqueInput!): Slot!
   bookings(distinct: [BookingScalarFieldEnum!], where: BookingWhereInput, orderBy: [BookingOrderByWithRelationInput!], cursor: BookingWhereUniqueInput, take: Float, skip: Float): [Booking!]!
+  bookingsForValet(distinct: [BookingScalarFieldEnum!], where: BookingWhereInput, orderBy: [BookingOrderByWithRelationInput!], cursor: BookingWhereUniqueInput, take: Float, skip: Float): [Booking!]!
+  bookingsForCustomer(distinct: [BookingScalarFieldEnum!], where: BookingWhereInput, orderBy: [BookingOrderByWithRelationInput!], cursor: BookingWhereUniqueInput, take: Float, skip: Float): [Booking!]!
+  bookingsForGarage(distinct: [BookingScalarFieldEnum!], where: BookingWhereInput, orderBy: [BookingOrderByWithRelationInput!], cursor: BookingWhereUniqueInput, take: Float, skip: Float): [Booking!]!
+  bookingsCount(where: BookingWhereInput): AggregateCountOutput!
   booking(where: BookingWhereUniqueInput!): Booking!
   valetAssignments(distinct: [ValetAssignmentScalarFieldEnum!], where: ValetAssignmentWhereInput, orderBy: [ValetAssignmentOrderByWithRelationInput!], cursor: ValetAssignmentWhereUniqueInput, take: Float, skip: Float): [ValetAssignment!]!
   valetAssignment(where: ValetAssignmentWhereUniqueInput!): ValetAssignment!
@@ -1080,6 +1116,7 @@ type Mutation {
   updateManager(updateManagerInput: UpdateManagerInput!): Manager!
   removeManager(where: ManagerWhereUniqueInput!): Manager!
   createValet(createValetInput: CreateValetInput!): Valet!
+  assignValet(bookingId: Float!, status: String!): Booking!
   updateValet(updateValetInput: UpdateValetInput!): Valet!
   removeValet(where: ValetWhereUniqueInput!): Valet!
   createCompany(createCompanyInput: CreateCompanyInput!): Company!
@@ -1092,6 +1129,7 @@ type Mutation {
   updateAddress(updateAddressInput: UpdateAddressInput!): Address!
   removeAddress(where: AddressWhereUniqueInput!): Address!
   createSlot(createSlotInput: CreateSlotInput!): Slot!
+  createManySlots(createSlotInput: CreateSlotInput!, count: Float!): ReturnCount!
   updateSlot(updateSlotInput: UpdateSlotInput!): Slot!
   removeSlot(where: SlotWhereUniqueInput!): Slot!
   createBooking(createBookingInput: CreateBookingInput!): Booking!
@@ -1182,12 +1220,14 @@ input CreateCompanyInput {
   displayName: String
   description: String
   managerId: String!
+  managerName: String
 }
 
 input UpdateCompanyInput {
   displayName: String
   description: String
   managerId: String
+  managerName: String
   id: Float!
 }
 
@@ -1195,14 +1235,32 @@ input CreateGarageInput {
   displayName: String
   description: String
   images: [String!]!
-  companyId: Float!
+  Address: CreateAddressInputWithoutGarageId!
+  Slots: [CreateSlotInputWithoutGarageId!]!
+}
+
+input CreateAddressInputWithoutGarageId {
+  address: String!
+  lat: Float!
+  lng: Float!
+}
+
+input CreateSlotInputWithoutGarageId {
+  displayName: String
+  length: Float
+  width: Float
+  height: Float
+  type: SlotType!
+  pricePerHour: Float!
+  count: Float!
 }
 
 input UpdateGarageInput {
   displayName: String
   description: String
   images: [String!]
-  companyId: Float
+  Address: CreateAddressInputWithoutGarageId
+  Slots: [CreateSlotInputWithoutGarageId!]
   id: Float!
 }
 
@@ -1279,36 +1337,30 @@ input UpdateBookingInput {
 input CreateValetAssignmentInput {
   returnLat: Float
   returnLng: Float
+  pickupValetId: String
+  returnValetId: String
   bookingId: Float!
   pickupLat: Float!
   pickupLng: Float!
-  pickupValetId: String!
-  returnValetId: String!
 }
 
 input UpdateValetAssignmentInput {
   returnLat: Float
   returnLng: Float
+  pickupValetId: String
+  returnValetId: String
   bookingId: Float!
   pickupLat: Float
   pickupLng: Float
-  pickupValetId: String
-  returnValetId: String
 }
 
 input CreateBookingTimelineInput {
   status: BookingStatus!
-  valetId: String
-  managerId: String
-  timestamp: DateTime!
   bookingId: Float!
 }
 
 input UpdateBookingTimelineInput {
   status: BookingStatus
-  valetId: String
-  managerId: String
-  timestamp: DateTime
   bookingId: Float
   id: Float!
 }
@@ -1331,11 +1383,9 @@ input UpdateReviewInput {
 input CreateVerificationInput {
   garageId: Float!
   verified: Boolean!
-  adminId: String!
 }
 
 input UpdateVerificationInput {
   garageId: Float!
   verified: Boolean
-  adminId: String
 }

@@ -20,12 +20,9 @@ export const LoginForm = ({ className }: ILoginFormProps) => {
 
   const { replace } = useRouter()
 
-  console.log('errors', errors)
-
   return (
     <Form
       onSubmit={handleSubmit(async (data) => {
-        console.log('data', data)
         const { email, password } = data
         const result = await signIn('credentials', {
           email,
@@ -51,7 +48,7 @@ export const LoginForm = ({ className }: ILoginFormProps) => {
           placeholder="******"
         />
       </HtmlLabel>
-      <Button type="submit">Sumbit</Button>
+      <Button type="submit">Submit</Button>
       <div className="mt-4 text-sm">
         Do not have an autospace account?
         <br />

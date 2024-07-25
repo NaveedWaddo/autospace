@@ -17,7 +17,9 @@ import { AllowAuthenticated, GetUser } from 'src/common/auth/auth.decorator'
 import { PrismaService } from 'src/common/prisma/prisma.service'
 import { User } from 'src/models/users/graphql/entity/user.entity'
 import { Verification } from 'src/models/verifications/graphql/entity/verification.entity'
+import { AdminWhereInput } from './dtos/where.args'
 
+@AllowAuthenticated('admin')
 @Resolver(() => Admin)
 export class AdminsResolver {
   constructor(
@@ -25,7 +27,6 @@ export class AdminsResolver {
     private readonly prisma: PrismaService,
   ) {}
 
-  @AllowAuthenticated()
   @Mutation(() => Admin)
   createAdmin(
     @Args('createAdminInput') args: CreateAdminInput,
@@ -46,6 +47,12 @@ export class AdminsResolver {
   }
 
   @AllowAuthenticated()
+  @Query(() => Admin, { name: 'adminMe' })
+  adminMe(@GetUser() user: GetUserType) {
+    return this.adminsService.findOne({ where: { uid: user.uid } })
+  }
+
+  @AllowAuthenticated()
   @Mutation(() => Admin)
   async updateAdmin(
     @Args('updateAdminInput') args: UpdateAdminInput,
@@ -58,13 +65,13 @@ export class AdminsResolver {
     return this.adminsService.update(args)
   }
 
-  @AllowAuthenticated()
   @Mutation(() => Admin)
   async removeAdmin(
     @Args() args: FindUniqueAdminArgs,
     @GetUser() user: GetUserType,
   ) {
     const admin = await this.prisma.admin.findUnique(args)
+    console.log('remove admin', user, admin.uid)
     checkRowLevelPermission(user, admin.uid)
     return this.adminsService.remove(args)
   }
@@ -85,6 +92,18 @@ export class AdminsResolver {
   async verificationsCount(@Parent() parent: Admin) {
     return this.prisma.verification.count({
       where: { adminId: parent.uid },
+    })
+  }
+
+  @Query(() => Number, {
+    name: 'adminsCount',
+  })
+  async adminsCount(
+    @Args('where', { nullable: true })
+    where: AdminWhereInput,
+  ) {
+    return this.prisma.admin.count({
+      where,
     })
   }
 }
