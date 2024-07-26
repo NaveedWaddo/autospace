@@ -8,7 +8,7 @@ async function bootstrap() {
   app.enableCors()
 
   const config = new DocumentBuilder()
-    .setTitle('Autospace | Karthick Ragavendran')
+    .setTitle('Autospace | Naveed Waddo')
     .setDescription(
       `The Autospace API.
 <h2>Looking for the graphql api?</h2>
