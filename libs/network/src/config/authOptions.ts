@@ -13,6 +13,10 @@ import { JWT } from 'next-auth/jwt'
 
 const MAX_AGE = 1 * 24 * 60 * 60
 
+const secureCookies = process.env.NEXTAUTH_URL?.startsWith('https://')
+const hostName = new URL(process.env.NEXTAUTH_URL || '').hostname
+const rootDomain = 'karthicktech.com'
+
 export const authOptions: NextAuthOptions = {
   // Configure authentication providers
   providers: [
@@ -20,6 +24,11 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          scope: 'openid profile',
+        },
+      },
     }),
     // Credentials provider configuration for email/password authentication
     CredentialsProvider({
@@ -105,6 +114,18 @@ export const authOptions: NextAuthOptions = {
         return null
       }
       // ...
+    },
+  },
+  cookies: {
+    sessionToken: {
+      name: `${secureCookies ? '__Secure-' : ''}next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: secureCookies,
+        domain: hostName == 'localhost' ? hostName : '.' + rootDomain, // add a . in front so that subdomains are included
+      },
     },
   },
 

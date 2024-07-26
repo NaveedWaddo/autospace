@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 }
 
 const MENUITEMS: MenuItem[] = [
-  { label: 'New Garage', href: '/createGarage' },
+  { label: 'New Garage', href: '/new-garage' },
   { label: 'Valets', href: '/valets' },
 ]
 
@@ -30,7 +30,7 @@ export default function RootLayout({
       <body className={`${inter.className} bg-gray-25`}>
         <SessionProvider>
           <ApolloProvider>
-            <Header menuItems={MENUITEMS} />
+            <Header type="manager" menuItems={MENUITEMS} />
             <Container>{children}</Container>
           </ApolloProvider>
         </SessionProvider>
