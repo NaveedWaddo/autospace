@@ -15,12 +15,10 @@ const MAX_AGE = 1 * 24 * 60 * 60
 
 const secureCookies = process.env.NEXTAUTH_URL?.startsWith('https://')
 const hostName = new URL(process.env.NEXTAUTH_URL || '').hostname
-const rootDomain = 'autospace-web.vercel.app'
+const rootDomains = ['autospace-web.vercel.app', 'autospace-web-valet1.vercel.app', 'autospace-web-manager.vercel.app']
 
 export const authOptions: NextAuthOptions = {
-  // Configure authentication providers
   providers: [
-    // Google OAuth provider configuration
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
@@ -30,16 +28,13 @@ export const authOptions: NextAuthOptions = {
         },
       },
     }),
-    // Credentials provider configuration for email/password authentication
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
       },
-      // Authorize function to validate user credentials
       async authorize(credentials) {
-        // Implement credential validation logic
         if (!credentials) {
           throw new Error('Email and password are required')
         }
@@ -52,9 +47,7 @@ export const authOptions: NextAuthOptions = {
           })
 
           if (!data?.login.token || error) {
-            throw new Error(
-              'Authentication failed: Invalid credentials or user not found',
-            )
+            throw new Error('Authentication failed: Invalid credentials or user not found')
           }
           const uid = data.login.user.uid
           const image = data.login.user.image
@@ -67,40 +60,29 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
 
-  // Enable debug mode for development
   debug: true,
 
-  // Configure session settings
   session: {
     strategy: 'jwt',
     maxAge: MAX_AGE,
   },
 
-  // Configure JWT settings
   jwt: {
     maxAge: MAX_AGE,
-    // Custom JWT encoding function
     async encode({ token, secret }): Promise<string> {
-      // Implement custom JWT encoding logic
       if (!token) {
         throw new Error('Token is undefined')
       }
       const { sub, ...tokenProps } = token
-      // Get the current date in seconds since the epoch
       const nowInSeconds = Math.floor(Date.now() / 1000)
-      // Calculate the expiration timestamp
       const expirationTimestamp = nowInSeconds + MAX_AGE
       return jwt.sign(
         { uid: sub, ...tokenProps, exp: expirationTimestamp },
         secret,
-        {
-          algorithm: 'HS256',
-        },
+        { algorithm: 'HS256' },
       )
     },
-    // Custom JWT decoding function
     async decode({ token, secret }): Promise<JWT | null> {
-      // Implement custom JWT decoding logic
       if (!token) {
         throw new Error('Token is undefined')
       }
@@ -113,7 +95,6 @@ export const authOptions: NextAuthOptions = {
       } catch (error) {
         return null
       }
-      // ...
     },
   },
   cookies: {
@@ -124,16 +105,13 @@ export const authOptions: NextAuthOptions = {
         sameSite: 'lax',
         path: '/',
         secure: secureCookies,
-        domain: hostName === 'localhost' ? hostName : `.${rootDomain}`, // add a . in front so that subdomains are included
+        domain: hostName === 'localhost' ? hostName : `.${rootDomains.find(domain => hostName.endsWith(domain))}`, // dynamically determine the domain
       },
     },
   },
 
-  // Configure callback functionss 
   callbacks: {
-    // Sign-in callback
     async signIn({ user, account }) {
-      // Implement sign-in logic, e.g., create user in database
       if (account?.provider === 'google') {
         const { id, name, image } = user
 
@@ -161,9 +139,7 @@ export const authOptions: NextAuthOptions = {
 
       return true
     },
-    // Session callback
     async session({ token, session }) {
-      // Customize session object based on token data
       if (token) {
         session.user = {
           image: token.picture,
@@ -173,11 +149,9 @@ export const authOptions: NextAuthOptions = {
         }
       }
       return session
-      // ...
     },
   },
 
-  // Configure custom pages
   pages: {
     signIn: '/signIn',
   },
